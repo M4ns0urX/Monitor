@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, type RefObject } from "react";
 
 import type { MonitorRecorderController } from "@/hooks/useMonitorRecorder";
+import { createDefaultMonitorAppearance } from "@/lib/ecg/appearance";
 import { ECG_PROFILES, HEART_STATUSES } from "@/lib/ecg/profiles";
 import type {
   AppearanceController,
@@ -13,6 +14,7 @@ import type {
 } from "@/lib/ecg/types";
 
 import styles from "./MonitorDisplay.module.css";
+import HexColorField from "./HexColorField";
 import RecordingControls from "./RecordingControls";
 import SequenceEditor from "./SequenceEditor";
 import SequencePlaybackControls from "./SequencePlaybackControls";
@@ -75,27 +77,23 @@ export default function MonitorContextPanel({
           <label className={styles.field}><span className={styles.rangeLabel}><span>Opacidade</span><output>{settings.opacity}%</output></span><input type="range" min="0" max="25" step="1" value={settings.opacity} onChange={(event) => updateSettings({ opacity: Number(event.target.value) })} /></label>
           <label className={styles.field}><span>Status</span><select value={status} disabled={automationActive} onChange={(event) => onStatusChange(event.target.value as HeartStatus)}>{HEART_STATUSES.map((heartStatus) => <option key={heartStatus} value={heartStatus}>{ECG_PROFILES[heartStatus].label}</option>)}</select></label>
           <section className={styles.appearanceSection} aria-label="Cores e ritmo visual">
-            <div className={styles.colorField}>
-              <label htmlFor="status-color">Cor de {ECG_PROFILES[status].label}</label>
-              <input
-                id="status-color"
-                type="color"
-                value={appearance.settings.statusColors[status]}
-                onChange={(event) => appearance.setStatusColor(status, event.target.value.toUpperCase())}
-              />
-              <code>{appearance.settings.statusColors[status]}</code>
-              <button type="button" onClick={() => appearance.resetStatusColor(status)}>Restaurar</button>
-            </div>
-            <div className={styles.colorField}>
-              <label htmlFor="background-color">Cor do fundo</label>
-              <input
-                id="background-color"
-                type="color"
-                value={appearance.settings.backgroundColor}
-                onChange={(event) => appearance.update({ backgroundColor: event.target.value.toUpperCase() })}
-              />
-              <code>{appearance.settings.backgroundColor}</code>
-            </div>
+            <HexColorField
+              key={`status-${status}`}
+              id={`status-${status}`}
+              label={`Cor de ${ECG_PROFILES[status].label}`}
+              value={appearance.settings.statusColors[status]}
+              onChange={(color) => appearance.setStatusColor(status, color)}
+              onReset={() => appearance.resetStatusColor(status)}
+            />
+            <HexColorField
+              id="background"
+              label="Cor do fundo"
+              value={appearance.settings.backgroundColor}
+              onChange={(backgroundColor) => appearance.update({ backgroundColor })}
+              onReset={() => appearance.update({
+                backgroundColor: createDefaultMonitorAppearance().backgroundColor,
+              })}
+            />
             <label className={styles.field}>
               <span className={styles.rangeLabel}><span>Espaçamento dos pulsos</span><output>{appearance.settings.pulseSpacing.toFixed(1)}×</output></span>
               <input type="range" min="0.5" max="2" step="0.1" value={appearance.settings.pulseSpacing} onChange={(event) => appearance.update({ pulseSpacing: Number(event.target.value) })} />

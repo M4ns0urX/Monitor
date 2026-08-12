@@ -20,6 +20,11 @@ export function validateHexColor(value: string): boolean {
   return HEX_COLOR_PATTERN.test(value);
 }
 
+export function normalizeHexColor(value: string): string | null {
+  const normalized = value.trim().toUpperCase();
+  return validateHexColor(normalized) ? normalized : null;
+}
+
 export function hexToColor(value: string): EcgColor {
   if (!validateHexColor(value)) throw new Error("Cor hexadecimal inválida.");
   return {

@@ -7,6 +7,7 @@ import {
   createDefaultMonitorAppearance,
   effectiveBpm,
   hexToColor,
+  normalizeHexColor,
   validateHexColor,
 } from "./appearance.ts";
 
@@ -19,6 +20,17 @@ test("valida apenas cores hexadecimais completas", () => {
   assert.equal(validateHexColor("#01040D"), true);
   assert.equal(validateHexColor("01040D"), false);
   assert.equal(validateHexColor("#GGGGGG"), false);
+});
+
+test("normaliza cores hexadecimais válidas para maiúsculas", () => {
+  assert.equal(normalizeHexColor("#f87171"), "#F87171");
+  assert.equal(normalizeHexColor("  #01040d  "), "#01040D");
+});
+
+test("não normaliza valores hexadecimais inválidos", () => {
+  assert.equal(normalizeHexColor("34D399"), null);
+  assert.equal(normalizeHexColor("#FFF"), null);
+  assert.equal(normalizeHexColor("#GGGGGG"), null);
 });
 
 test("cria aparência com as cores padrão dos cinco estados", () => {
