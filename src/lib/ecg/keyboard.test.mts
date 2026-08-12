@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { shouldStartSequenceWithSpace } from "./keyboard.ts";
+import {
+  shouldOpenSettingsWithOne,
+  shouldStartSequenceWithSpace,
+} from "./keyboard.ts";
 
 const keyboardEvent = (
   change: Partial<Parameters<typeof shouldStartSequenceWithSpace>[0]> = {},
@@ -60,6 +63,35 @@ test("ignora alvos interativos ou editáveis", () => {
 
   assert.equal(
     shouldStartSequenceWithSpace(keyboardEvent({ targetEditable: true }), "idle"),
+    false,
+  );
+});
+
+test("permite abrir configurações com 1 da linha numérica ou teclado numérico", () => {
+  assert.equal(shouldOpenSettingsWithOne(keyboardEvent({ code: "Digit1", key: "1" })), true);
+  assert.equal(shouldOpenSettingsWithOne(keyboardEvent({ code: "Numpad1", key: "1" })), true);
+  assert.equal(shouldOpenSettingsWithOne(keyboardEvent({ code: "", key: "1" })), true);
+});
+
+test("ignora outras teclas, repetição e modificadores no atalho 1", () => {
+  assert.equal(shouldOpenSettingsWithOne(keyboardEvent({ code: "Digit2", key: "2" })), false);
+  assert.equal(shouldOpenSettingsWithOne(keyboardEvent({ code: "Digit1", key: "1", repeat: true })), false);
+  assert.equal(shouldOpenSettingsWithOne(keyboardEvent({ code: "Digit1", key: "1", ctrlKey: true })), false);
+  assert.equal(shouldOpenSettingsWithOne(keyboardEvent({ code: "Digit1", key: "1", altKey: true })), false);
+  assert.equal(shouldOpenSettingsWithOne(keyboardEvent({ code: "Digit1", key: "1", metaKey: true })), false);
+  assert.equal(shouldOpenSettingsWithOne(keyboardEvent({ code: "Digit1", key: "1", shiftKey: true })), false);
+});
+
+test("ignora o atalho 1 em alvos interativos ou editáveis", () => {
+  for (const targetTagName of ["INPUT", "TEXTAREA", "SELECT", "BUTTON", "A"]) {
+    assert.equal(
+      shouldOpenSettingsWithOne(keyboardEvent({ code: "Digit1", key: "1", targetTagName })),
+      false,
+    );
+  }
+
+  assert.equal(
+    shouldOpenSettingsWithOne(keyboardEvent({ code: "Digit1", key: "1", targetEditable: true })),
     false,
   );
 });

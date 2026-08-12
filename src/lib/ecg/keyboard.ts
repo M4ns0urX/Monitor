@@ -1,6 +1,6 @@
 import type { SequencePlaybackState } from "./types.ts";
 
-export type SpaceShortcutEvent = {
+export type KeyboardShortcutEvent = {
   code: string;
   key: string;
   repeat: boolean;
@@ -21,7 +21,7 @@ const INTERACTIVE_TAGS = new Set([
 ]);
 
 export function shouldStartSequenceWithSpace(
-  event: SpaceShortcutEvent,
+  event: KeyboardShortcutEvent,
   playbackState: SequencePlaybackState,
 ): boolean {
   const isSpace =
@@ -31,6 +31,24 @@ export function shouldStartSequenceWithSpace(
   return (
     isSpace &&
     canStart &&
+    !event.repeat &&
+    !event.altKey &&
+    !event.ctrlKey &&
+    !event.metaKey &&
+    !event.shiftKey &&
+    !event.targetEditable &&
+    !INTERACTIVE_TAGS.has(event.targetTagName.toUpperCase())
+  );
+}
+
+export function shouldOpenSettingsWithOne(
+  event: KeyboardShortcutEvent,
+): boolean {
+  const isOne =
+    event.key === "1" || event.code === "Digit1" || event.code === "Numpad1";
+
+  return (
+    isOne &&
     !event.repeat &&
     !event.altKey &&
     !event.ctrlKey &&

@@ -9,7 +9,10 @@ import {
 } from "react";
 
 import { useMonitorRecorder } from "@/hooks/useMonitorRecorder";
-import { shouldStartSequenceWithSpace } from "@/lib/ecg/keyboard";
+import {
+  shouldOpenSettingsWithOne,
+  shouldStartSequenceWithSpace,
+} from "@/lib/ecg/keyboard";
 import type {
   AppearanceController,
   BackgroundTextSettings,
@@ -45,7 +48,6 @@ export default function MonitorDisplay({
 }: MonitorDisplayProps) {
   const monitorRef = useRef<HTMLElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
-  const settingsButtonRef = useRef<HTMLButtonElement>(null);
   const [panelOpen, setPanelOpen] = useState(false);
   const recorder = useMonitorRecorder();
   const playbackState = sequence.progress.state;
@@ -88,13 +90,42 @@ export default function MonitorDisplay({
   }, [playbackState, sequenceCanStart, startSequence]);
 
   useEffect(() => {
+    const handleSettingsShortcut = (event: globalThis.KeyboardEvent) => {
+      const target = event.target instanceof Element ? event.target : null;
+      const interactiveTarget = target?.closest(
+        "a, button, input, select, textarea",
+      );
+
+      if (!shouldOpenSettingsWithOne({
+        code: event.code,
+        key: event.key,
+        repeat: event.repeat,
+        altKey: event.altKey,
+        ctrlKey: event.ctrlKey,
+        metaKey: event.metaKey,
+        shiftKey: event.shiftKey,
+        targetTagName: interactiveTarget?.tagName ?? target?.tagName ?? "",
+        targetEditable: target instanceof HTMLElement && target.isContentEditable,
+      })) {
+        return;
+      }
+
+      event.preventDefault();
+      setPanelOpen(true);
+    };
+
+    document.addEventListener("keydown", handleSettingsShortcut);
+    return () => document.removeEventListener("keydown", handleSettingsShortcut);
+  }, []);
+
+  useEffect(() => {
     if (!panelOpen) {
       return;
     }
 
     const handlePointerDown = (event: PointerEvent) => {
       const target = event.target as Node;
-      if (!panelRef.current?.contains(target) && !settingsButtonRef.current?.contains(target)) {
+      if (!panelRef.current?.contains(target)) {
         setPanelOpen(false);
       }
     };
@@ -102,7 +133,7 @@ export default function MonitorDisplay({
     const handleKeyDown = (event: globalThis.KeyboardEvent) => {
       if (event.key === "Escape") {
         setPanelOpen(false);
-        settingsButtonRef.current?.focus();
+        monitorRef.current?.focus();
       }
     };
 
@@ -134,7 +165,7 @@ export default function MonitorDisplay({
 
   const closePanel = () => {
     setPanelOpen(false);
-    settingsButtonRef.current?.focus();
+    monitorRef.current?.focus();
   };
 
   return (
@@ -168,18 +199,6 @@ export default function MonitorDisplay({
       <div className={styles.readoutPosition}>
         <VitalReadout profile={profile} />
       </div>
-
-      <button
-        ref={settingsButtonRef}
-        type="button"
-        className={styles.settingsButton}
-        aria-label="Abrir configurações"
-        aria-controls="monitor-settings-panel"
-        aria-expanded={panelOpen}
-        onClick={() => setPanelOpen((open) => !open)}
-      >
-        <span aria-hidden="true">⚙</span>
-      </button>
 
       {panelOpen ? (
         <MonitorContextPanel

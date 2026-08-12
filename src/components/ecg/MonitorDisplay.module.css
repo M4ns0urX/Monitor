@@ -130,40 +130,6 @@
   animation: bpmChange 320ms ease-out;
 }
 
-.settingsButton {
-  position: absolute;
-  z-index: 7;
-  top: 50%;
-  right: 0;
-  display: grid;
-  width: 3rem;
-  height: 3.5rem;
-  place-items: center;
-  border: 1px solid rgb(255 255 255 / 12%);
-  border-right: 0;
-  border-radius: 0.9rem 0 0 0.9rem;
-  background: rgb(4 8 18 / 86%);
-  color: rgb(255 255 255 / 72%);
-  font-size: 1.25rem;
-  box-shadow: 0 20px 60px rgb(0 0 0 / 38%);
-  backdrop-filter: blur(16px);
-  cursor: pointer;
-  transform: translateY(-50%);
-  transition:
-    width 180ms ease,
-    color 180ms ease,
-    background-color 180ms ease;
-}
-
-.settingsButton:hover,
-.settingsButton:focus-visible,
-.settingsButton[aria-expanded="true"] {
-  width: 3.35rem;
-  background: rgb(10 18 31 / 96%);
-  color: white;
-  outline: none;
-}
-
 .contextPanel {
   position: fixed;
   z-index: 20;
@@ -397,7 +363,6 @@
     animation: none;
   }
 
-  .settingsButton,
   .contextPanel,
   .recordingTimer span {
     transition: none;
